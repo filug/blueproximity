@@ -14,6 +14,7 @@ SW_VERSION = '1.2.5-1'
 #  Bluetooth (python-bluez)
 
 # copyright by Lars Friedrichs <larsfriedrichs@gmx.de>
+# copyright by Piotr L. Figlarek <piotr.figlarek@gmail.com>
 # this source is licensed under the GPL.
 # I'm a big fan of talkback about how it performs!
 # I'm also open to feature requests and notes on programming issues, I am no python master at all...
@@ -21,7 +22,6 @@ SW_VERSION = '1.2.5-1'
 # follow http://blueproximity.sourceforge.net
 
 APP_NAME="blueproximity"
-
 
 # system includes
 import os
@@ -32,20 +32,17 @@ import signal
 import syslog
 import locale
 
-
 #Translation stuff
 import gettext
-	
+
 
 ## This value gives us the base directory for language files and icons.
 # Set this value to './' for svn version
 # or to '/usr/share/blueproximity/' for packaged version
-dist_path = os.path.dirname(os.path.abspath(__file__)) 
-print("Path: {}".format(dist_path))
-
+dist_path = os.path.dirname(os.path.abspath(__file__))
 
 #Get the local directory since we are not installing anything
-local_path = dist_path + 'LANG/'
+local_path = os.path.join(dist_path, 'LANG')
 # Init the list of languages to support
 langs = []
 #Check the default locale
@@ -193,7 +190,7 @@ class ProximityGUI (object):
         self.gone_live = False
         
         #Set the Glade file
-        self.gladefile = dist_path + "proximity.glade"  
+        self.gladefile = os.path.join(dist_path, "proximity.glade")  
         self.wTree = gtk.glade.XML(self.gladefile) 
 
         #Create our dictionary and connect it
@@ -221,7 +218,7 @@ class ProximityGUI (object):
         self.window = self.wTree.get_widget("MainWindow")
         if (self.window):
             self.window.connect("delete_event", self.btnClose_clicked)
-        self.window.set_icon(gtk.gdk.pixbuf_new_from_file(dist_path + icon_base))
+        self.window.set_icon(gtk.gdk.pixbuf_new_from_file(os.path.join(dist_path, icon_base)))
         self.proxi = configs[0][2]
         self.minDist = -255
         self.maxDist = 0
@@ -286,7 +283,7 @@ class ProximityGUI (object):
         #Prepare icon
         self.icon = gtk.StatusIcon()
         self.icon.set_tooltip(_("BlueProximity starting..."))
-        self.icon.set_from_file(dist_path + icon_con)
+        self.icon.set_from_file(os.path.join(dist_path + icon_con))
         
         #Setup the popup menu and associated callbacks
         self.popupmenu = gtk.Menu()
@@ -529,7 +526,7 @@ class ProximityGUI (object):
 
     ## Callback to create and show the info dialog.
     def aboutPressed(self, widget, data = None):
-        logo = gtk.gdk.pixbuf_new_from_file(dist_path + icon_base)
+        logo = gtk.gdk.pixbuf_new_from_file(os.path.join(dist_path + icon_base))
         description = _("Leave it - it's locked, come back - it's back too...")
         copyright = u"""Copyright (c) 2007,2008 Lars Friedrichs"""
         people = [
@@ -592,7 +589,7 @@ Former translators:
             for config in configs:
                 config[2].dev_mac = config[2].lastMAC
                 config[2].Simulate = False
-            self.icon.set_from_file(dist_path + icon_con)
+            self.icon.set_from_file(os.path.join(dist_path + icon_con))
         else:
             self.pauseMode = True
             for config in configs:
@@ -802,7 +799,7 @@ Former translators:
 
     def quit(self, widget, data = None):
         #try to close everything correctly
-        self.icon.set_from_file(dist_path + icon_att)
+        self.icon.set_from_file(os.path.join(dist_path + icon_att))
 	for config in configs:
            config[2].logger.log_line(_('stopped.'))
            config[2].Stop = 1
@@ -824,7 +821,7 @@ Former translators:
         
         #Update icon too
         if self.pauseMode:
-            self.icon.set_from_file(dist_path + icon_pause)
+            self.icon.set_from_file(os.path.join(dist_path + icon_pause))
             self.icon.set_tooltip(_('Pause Mode - not connected'))
         else:
             # we have to show the 'worst case' since we only have one icon but many configs...
@@ -849,7 +846,7 @@ Former translators:
                 simu = _('\nSimulation Mode (locking disabled)')
             else:
                 simu = ''
-            self.icon.set_from_file(dist_path + con_icons[connection_state])
+            self.icon.set_from_file(os.path.join(dist_path,con_icons[connection_state]))
             self.icon.set_tooltip(con_info + '\n' + simu)
         self.timer = gobject.timeout_add(1000,self.updateState)
         
@@ -1197,7 +1194,7 @@ class Proximity (threading.Thread):
         state = _("gone")
         proxiCmdCounter = 0
         while not self.Stop:
-            #print "tick"
+            # print "tick"
             try:
                 if self.dev_mac != "":
                     self.ErrorMsg = _("running...")
@@ -1246,6 +1243,8 @@ class Proximity (threading.Thread):
                 break
         self.kill_connection()
 
+configs = []
+
 def main():
     gtk.glade.bindtextdomain(APP_NAME, local_path)
     gtk.glade.textdomain(APP_NAME)
@@ -1253,8 +1252,7 @@ def main():
     
     # react on ^C
     signal.signal(signal.SIGINT, signal.SIG_DFL)
-    # read config if any
-    configs = []
+    # read config if any    
     new_config = True
     conf_dir = os.path.join(os.getenv('HOME'),'.blueproximity')
     try:

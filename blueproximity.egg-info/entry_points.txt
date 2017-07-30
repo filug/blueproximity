@@ -1,0 +1,3 @@
+[console_scripts]
+blueproximity = blueproximity.proximity:main
+

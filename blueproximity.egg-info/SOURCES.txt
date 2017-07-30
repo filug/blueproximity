@@ -1,0 +1,15 @@
+README
+setup.py
+blueproximity/__init__.py
+blueproximity/blueproximity_attention.svg
+blueproximity/blueproximity_base.svg
+blueproximity/blueproximity_error.svg
+blueproximity/blueproximity_nocon.svg
+blueproximity/blueproximity_pause.svg
+blueproximity/proximity.glade
+blueproximity/proximity.py
+blueproximity.egg-info/PKG-INFO
+blueproximity.egg-info/SOURCES.txt
+blueproximity.egg-info/dependency_links.txt
+blueproximity.egg-info/entry_points.txt
+blueproximity.egg-info/top_level.txt
